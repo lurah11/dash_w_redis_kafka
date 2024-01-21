@@ -1,6 +1,7 @@
 import json 
 from confluent_kafka import Consumer, KafkaException
 from producer import topic
+import redis
 
 conf = {
     'bootstrap.servers':'localhost:9092',
@@ -10,7 +11,7 @@ conf = {
 
 consumer = Consumer(conf)
 
-
+redis_client = redis.StrictRedis(decode_responses=True)
 
 def basic_consume_loop(consumer,topics=[topic]): 
     running = True
@@ -18,6 +19,8 @@ def basic_consume_loop(consumer,topics=[topic]):
         consumer.subscribe(topics)
         timeout_count = 300
         while running : 
+            if timeout_count == 0 : 
+                break
             msg = consumer.poll(timeout=1.0)
             if msg is None: 
                 timeout_count -= 1
@@ -27,8 +30,10 @@ def basic_consume_loop(consumer,topics=[topic]):
                 raise(KafkaException(msg.error()))
             else : 
                 data = json.loads(msg.value().decode('utf-8'))
-                print(type(msg))
-                print(msg.offset())
+                redis_client.zadd("item_order",{str(data['index']):data['index']})
+                redis_client.set(str(data['index']),msg.value())
+                print(data)
+             
     finally:
         running = False
         consumer.close()    

@@ -24,10 +24,11 @@ topic = 'dataviz'
 
 df = pd.read_csv('earthquake_data.csv',parse_dates=True)
 
-test_data = df.loc[:20,['Date','Longitude','Latitude','Magnitude']]
+test_data = df.loc[:30,['Date','Longitude','Latitude','Magnitude']]
 
 for data in test_data.itertuples() : 
     data_obj = {}
+    data_obj['index'] = data.Index
     data_obj['date'] = data.Date
     data_obj['longitude']=data.Longitude
     data_obj['latitude']=data.Latitude
@@ -36,5 +37,5 @@ for data in test_data.itertuples() :
     data_obj_json = json.dumps(data_obj)
     producer.produce(topic,value=data_obj_json)
     producer.poll(1)
-    time.sleep(0.1)
+    time.sleep(0.5)
 producer.flush()
