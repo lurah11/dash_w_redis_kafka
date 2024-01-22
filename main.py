@@ -55,8 +55,8 @@ def update_graph(n, relayout_data):
     map_figure.update_layout(mapbox_style="open-street-map")
 
     # Create line figure
-    line_figure = px.line(df, x='date', y='magnitude')
+    line_figure = px.line(df[-100:-1], x='date', y='magnitude')
     return map_figure, line_figure
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=False,host='0.0.0.0',port=8080)
